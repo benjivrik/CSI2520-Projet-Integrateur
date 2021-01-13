@@ -10,8 +10,23 @@
 
 public class Knapsack
 {
-    public Knapsack()
-    {
+    private int capacity;
 
+    public Knapsack(int capacity)
+    {
+        this.capacity = capacity;
+    }
+
+    /**
+     * getters and setters
+     */
+    public int getCapacity()
+    {
+        return this.capacity;
+    }
+
+    public String toString()
+    {
+        return "";
     }
 }
