@@ -17,7 +17,6 @@ import java.util.Scanner;
 public class KnapsackProblem
 {
 
-    
     public static void main(String[] args)
     {
     
@@ -133,10 +132,15 @@ public class KnapsackProblem
                 }
                 else
                 {
-                    if(mode.equals("S"))
+                    if(mode.equals("D"))
                     {
-                        // TO  DO
-                        System.out.println("Nothing");
+                        System.out.printf(
+                            String.format("\n----------- PROGRAMMATION DYNAMIQUE (%s) ------------\n", mode)
+                        );
+                        
+                        // procéder à la méthode dynamique
+                        DynamicProgramming dProgramming = new DynamicProgramming();
+                        dProgramming.dynamicProgramming(capacity, availableItems, file);
                     }
                     else
                     {

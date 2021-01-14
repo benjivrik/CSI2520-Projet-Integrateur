@@ -30,16 +30,16 @@ public class BruteForce
      *           availableItems - Liste des items disponible à ajouter dans le sac
      *           file - which is the file in which the solution has to be written 
      * 
-     * @return la valeur optimale des possibilité d'items à ajouter dans le sac
+     * @return le Knapsack sac optimal
      */
 
-    public int bruteForce(int capacity, 
+    public Knapsack bruteForce(int capacity, 
                           List<Item> availableItems, File file)
     {
         // capacité du sac
         this.capacity = capacity;
 
-        // boolean pour indiquer que les valeurs dans le tableau déborde
+        // boolean pour indiquer que les valeurs dans le tableau déborde (le tableau des drapeaux - flags)
         overflow =  false; 
 
 
@@ -73,49 +73,61 @@ public class BruteForce
 
 
         // proceder à l'analyse;
-        // la section qui suit provient la référence github et a été légèrement modifié pour adaption
+        // la section qui suit provient la référence github et a été légèrement modifié pour adaptation
         // référence :  https://github.com/mraediaz/Knapsack/blob/master/BruteForce.java
         System.out.printf(
             String.format("\n-> Flags set for items: %s \n", String.join("",items_repr))
         );
-        while (!overflow) {
-            //go through the array of permutations
-            for (int i = 0; i < flags.length; i++){
-
-                //if there is an item the thief is taking, add it's weight
-                //to the weight the thief is considering taking
-                if(flags[i]  == 1) {
+        // procéder à la méthode Force Brute
+        while (!overflow) 
+        {
+            // itérer à travers les tableaux des flags 
+            // ces flags sont utilisés pour indiquer quel valeur sont ajoutés dans le sac
+            // durant la recherche de la valeur optimale
+            for (int i = 0; i < flags.length; i++)
+            {
+                // l'item pris par le voleur est mis à 1 dans le tableau flags
+                if(flags[i]  == 1) 
+                {
+                    // initialiser le poids courant dans le sac en fonction des items ajouté
                     currentWeight += items_weight[i];
 
-                    //if that weight fits in the knapsack, add the
-                    //values of the prices
-                    if (currentWeight <= this.capacity) {
+                    // si le poids de l'item ajouté n'excède pas la capacité du sac
+                    if (currentWeight <= this.capacity) 
+                    {
+                        
                         currentValue += items_values[i];
-                        //find the most optimal value for the thief
+                        // initialiser la valeur optimale (maxValue) en fonction de la valeur actuelle
+                        // des items dans le sac
                         if(currentValue > maxValue)
                             maxValue = currentValue;
                     }
-                    //if the weight was too much for the knapsack's capacity, value is 0
+                    // le poids de l'item ajouté excèle la capacité du sac, alors la valeur actuelle
+                    // est reinitialisé à 0
                     else
                         currentValue = 0;
                 }
             }
 
-            //to print all of the combinations of the knapsack considered
-            //the last one printed is the most optimal
+            // maintenant la valeur optimal du sac est trouvé pour le set the flags sélectionné
             if(currentValue == maxValue)
             {
+                // imprimer les drapeaux qui correspondent à cette valeur optimal
                 System.out.println("the flags set are now:  " + toString(flags) + " Weight: " + currentWeight + " Value: " + currentValue + "\t");
                 // copier le array de flags
                 // la dernière collectée est la valeur optimale hors de la loop
                 index = 0;
+
+                // copier les valeurs de flags dans le tableau de copie flags_copy
+                // les dernières valeurs copié dans le tableau flags_copy
+                // correspondent aux items pour la valeur optimale dans le sac en Force Brute
                 for(int i : flags)
                 {
                     flags_copy[index++] = flags[i];
                 }
             }
                 
-
+            // réinitialiser les variables utilitaires
             currentWeight = 0;
             currentValue = 0;
 
@@ -125,7 +137,7 @@ public class BruteForce
             }
         }
 
-        // initialize the knapsack back
+        // créer l'objet Knapsack pour le sac optimal
         Knapsack sac = new Knapsack(this.capacity);
         // ajouter les items dans le knapsack
         index = 0;
@@ -145,7 +157,8 @@ public class BruteForce
         // write solution inside the appropriate file
         this.writeSolutionInFile(file, sac);
 
-        return maxValue;
+        // retourner le sac correspondant au scenario optimal
+        return sac;
     }
 
     /**
@@ -164,10 +177,7 @@ public class BruteForce
         filename += ".sol";
 
         File solution = new File(filename);
-
-        // Append a text at the end of the file
         try {
-            
            
             // utiliser la classe Filewriter pour écrire le contenu
             FileWriter writer =  new FileWriter(solution.getAbsolutePath());
@@ -189,7 +199,7 @@ public class BruteForce
     }
 
     /**
-     * Reference used for building this method: https://github.com/mraediaz/Knapsack/blob/master/BruteForce.java
+     * Reference used for this method: https://github.com/mraediaz/Knapsack/blob/master/BruteForce.java
      * resets the permutation array to all 0's.
      * Pre-condition:  Array has a length > 0
      * Post condition:  The returned array is filled with integer "0" and
@@ -219,6 +229,8 @@ public class BruteForce
      * Post condition:  The returned array is "bumpped" by 1 as a binary counter
      *                If the binary counter overflows, overflow is set to
      *               "true" otherwise overflow is set to "false"
+     * 
+     * Added description : Cette méthode génère de nouvelles valeurs dans le tableau flags
      */
     public  int[] bump(int[] x)
     {
@@ -249,7 +261,7 @@ public class BruteForce
      * @return a String representation of the array's content
      * 
      * takes the array of permutations and transforms it to a printable string
-     * reference for this method : Reference used for building this method: https://github.com/mraediaz/Knapsack/blob/master/BruteForce.java
+     * reference for this method :  https://github.com/mraediaz/Knapsack/blob/master/BruteForce.java
      */
     public String toString(int[] x)
     {
@@ -270,7 +282,9 @@ public class BruteForce
      * @return a String representation of the array's content
      * assert methods
      * confirms that the integers in the permutation array are just 0s and 1s
-     * reference for this method : Reference used for building this method: https://github.com/mraediaz/Knapsack/blob/master/BruteForce.java
+     * reference for this method : https://github.com/mraediaz/Knapsack/blob/master/BruteForce.java
+     * 
+     * Added description : vérifie que le tableau ne contient que des 0 et des 1
      * 
      * */
     public boolean isBinary(int[] x)
