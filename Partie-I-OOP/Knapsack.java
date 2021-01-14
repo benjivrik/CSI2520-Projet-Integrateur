@@ -106,10 +106,28 @@ public class Knapsack
         return this.capacity;
     }
 
+    public void setCapacity(int capacity)
+    {
+        this.capacity = capacity;
+    }
+
+    /**
+     * return the list of the all items inside the knapsack
+     * @return List<Item> item
+     */
+
+    public List<Item> getItems()
+    {
+        return this.items;
+    }
+
+    /**
+     * String representation of the object Knapsack
+     */
     public String toString()
     {
         System.out.printf("\n----------- Information sur le sac (Knapsack) ------------\n");
-        
+
         StringBuilder builder = new StringBuilder();
 
         builder.append(
