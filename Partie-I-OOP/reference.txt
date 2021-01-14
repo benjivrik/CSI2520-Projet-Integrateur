@@ -2,4 +2,4 @@ Brute force : https://github.com/mraediaz/Knapsack/blob/master/BruteForce.java
 Dynamic Programming  : https://medium.com/@fabianterh/how-to-solve-the-knapsack-problem-with-dynamic-programming-eb88c706d3cf
 Assertion : https://www.geeksforgeeks.org/assertions-in-java/
 Filename without extension : https://stackoverflow.com/questions/924394/how-to-get-the-filename-without-the-extension-in-java
-File Writing java: https://www.w3schools.com/java/java_files_create.asp
+File Handling java: https://www.w3schools.com/java/java_files.asp
