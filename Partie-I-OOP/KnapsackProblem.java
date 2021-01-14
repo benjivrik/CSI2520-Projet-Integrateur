@@ -1,3 +1,4 @@
+
 /**
  * 
  * Student : Benjamin Kataliko Viranga
@@ -9,8 +10,8 @@
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class KnapsackProblem
@@ -68,9 +69,9 @@ public class KnapsackProblem
 
                 // liste des items
 
-                // TO ADD
+                List<Item> availableItems = new ArrayList<Item>();
 
-                // compter n_items à partir de la suivante
+                // compter n_items à partir de la ligne suivante
                 while(n_items-- > 0)
                 {
 
@@ -89,11 +90,14 @@ public class KnapsackProblem
                                 Integer.parseInt(values[2])  // weight of the item
                             );
 
-                            System.out.println(i); // < DEBUG purpose
+                            availableItems.add(i);
+                            //System.out.println(i); // < DEBUG purpose
                         }
                     }
                        
                 }
+                // afficher le contenu du array
+                // System.out.println(availableItems); // < DEBUG purpose
 
                 // la dernière ligne est la capacité du sac
                 int capacity = 0;
@@ -106,13 +110,40 @@ public class KnapsackProblem
 
                     capacity = Integer.parseInt(values[0]);
 
-                    System.out.println("Bag capacity: " + capacity);
+                    // System.out.println("Bag capacity: " + capacity); // < DEBUG Purpose
                 }
                 else
                 {
                     System.out.println("> PROBLÈME - La dernière ligne pour la capacité du sac n'existe pas."+
                                         "\nVeuillez vérifier le contenu votre fichier: " + file.getName());
                     System.exit(0);
+                }
+
+
+                // procéder avec les méthodes F ou D
+                if(mode.equals("F"))
+                {
+                    System.out.printf(
+                        String.format("\n----------- FORCE BRUTE (%s) ------------\n", mode)
+                    );
+                    
+                    // procéder avec la méthode brute fore
+                    BruteForce bForce = new BruteForce();
+                    bForce.bruteForce(capacity, availableItems, file);
+                }
+                else
+                {
+                    if(mode.equals("S"))
+                    {
+                        // TO  DO
+                        System.out.println("Nothing");
+                    }
+                    else
+                    {
+                        // verifier le input pour le mode
+                        System.out.println("Check the input for the mode. You entered : " + mode);
+                    }
+                    
                 }
 
             } catch (FileNotFoundException e) {
@@ -122,7 +153,7 @@ public class KnapsackProblem
        else
        {
            System.out.println(
-               "\n> Le programme s'attend à deux arguments : Le nom du fichier et le mode à utiliser. <\n"
+               "\n> PROBLÈME -  Le programme s'attend à deux arguments : Le nom du fichier et le mode à utiliser. <\n"
             );
        }
     }

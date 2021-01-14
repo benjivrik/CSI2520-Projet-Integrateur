@@ -1,0 +1,1 @@
+Brute force : https://github.com/mraediaz/Knapsack/blob/master/BruteForce.java
