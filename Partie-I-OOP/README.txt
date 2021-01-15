@@ -34,5 +34,11 @@ Peu importe le nom du fichier utilisé l'entrée : pour (filename.txt), la solut
 contienne les memes données que p1.txt;
 
 
+Autres exigences: 
+
+une classe Knapsack (représentant les items contenus dans le sac); > Fichier : Knapsack.java
+une classe Item (et une liste d'instances de Item); > Fichier : Item.java
+une table KTable contenant les instances de Knapsack (pour la solution dynamique); > localisée dans DynamicProgramming.java
+
 
 

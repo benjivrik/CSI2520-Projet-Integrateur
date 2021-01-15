@@ -8,9 +8,6 @@
  */
 
 import java.util.List;
-
-import javax.swing.plaf.basic.BasicComboBoxUI.ItemHandler;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
