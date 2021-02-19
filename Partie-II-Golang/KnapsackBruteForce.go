@@ -82,7 +82,19 @@ func KnapSack(W int, wt []int, val []int) int {
 	// (1) nth item included 
 	// (2) item not included 
 	} else {
-		return Max(val[last] + KnapSack(W - wt[last], wt[:last], val[:last]), KnapSack(W, wt[:last], val[:last]))
+
+		nth_included := val[last] + KnapSack(W - wt[last], wt[:last], val[:last])
+		nth_not_included := KnapSack(W, wt[:last], val[:last])
+
+		// if  Max(nth_included, nth_not_included) == nth_included {
+		// 	fmt.Printf("%d ", nth_included)
+
+		// 	return nth_included
+		// }else{
+		// 	return nth_not_included
+		// }
+
+		return Max(nth_included,nth_not_included)
 	}
 } 
 
@@ -120,7 +132,7 @@ func main()  {
 
     scanner := bufio.NewScanner(file)
 	// initialize a slice of item in which the availables items will be stored
-	// availableItems := []Item{}
+	availableItems := []Item{}
 
 	// number of items supposed to be added in knapsack
 	// data initialized after reading the file
@@ -172,21 +184,60 @@ func main()  {
 		// display item information
 		fmt.Println(item.ToString())
 
+		// add the item in the array of the available items 
+		availableItems = append(availableItems, *item)
+		
 		// fmt.Println(scanner.Scan())
 		n_items--
     }
 
-	fmt.Println(len(os.Args))
+	// fmt.Printf(">> length of the available items : %d. | Items: %v\n", len(availableItems), availableItems) // << DEBUG PURPOSE
 
+    // get the capacity of the knapsack from the file
+	// get the number of element inside to add in the Knapsack
+	// no need for scanner.Scan() since it is one of the condition for breaking the loop
+	line :=  scanner.Text()
 
+	maxWeight := 0
 
-	
+	if line != "" {   // make sure the line is not empty
+		splitLine := strings.Split(line," ")
+		// fmt.Println(">>", len(splitLine)) // << DEBUG PURPOSE
+		// make sure there is not emply strings left
+		splitLine = filter(splitLine)
+		// get the value
+		maxWeight,err = strconv.Atoi(splitLine[0])
+		
+		// make sure there is no error
+		check(err)
+	}else{
+		fmt.Println("Could not get the value for the maximum capacity of the Knapsack.")
+		fmt.Println("Please check the content of your file : ", file.Name())
+		return
+	}
+
     fmt.Println("Number of cores: ",runtime.NumCPU())
+
+	// initialize the parameters required for the defined function KnapSack
+	// maximum Knapsack capacity
+	W :=  maxWeight
+
+	// initialize empty slice for the weights and the values
+	weights := []int{}
+	values := []int{}
+
+	// initialize the above slices
+	for _,item := range availableItems{
+		weights = append(weights,item.weight)
+		values  = append(values,item.value)
+	}
+
+	fmt.Println("\n>>>> Collected data <<<<< \n")
+	fmt.Printf("Knapsack capacity : %d\n", maxWeight)
+	fmt.Printf("Weights: %v\nValues: %v\n", weights, values)
 	
-	// simple example
-	W:= 7
-	weights := []int{1,2,3,5}
-	values := []int{1,6,10,15}
+
+	fmt.Println("\n>>>> Solution <<<<< \n")
 	
 	start := time.Now();
 	fmt.Println(KnapSack(W, weights , values)) 
