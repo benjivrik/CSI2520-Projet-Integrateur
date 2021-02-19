@@ -31,7 +31,7 @@ public class Item
     {
         return this.repr;
     }
-    public void setRepresenation(String repr)
+    public void setRepresentation(String repr)
     {
         this.repr = repr;
     }

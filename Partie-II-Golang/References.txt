@@ -1,0 +1,3 @@
+* Read file line by line in golang :  https://stackoverflow.com/questions/8757389/reading-a-file-line-by-line-in-go/16615559#16615559
+* Read files in golang : https://gobyexample.com/reading-files
+* Log module in golang : https://golang.org/pkg/log/
