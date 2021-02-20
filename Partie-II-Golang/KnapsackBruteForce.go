@@ -51,6 +51,17 @@ func filter(slice []string) ([]string){
 	return newSlice
 }
 
+// custom function for finding the corresponding item selected
+// find the item by its value and its weight
+func displayItem(availableItems []Item, value, weight int){
+	for _, item :=  range availableItems {
+		if item.weight ==  weight && item.value == value {
+			fmt.Printf("%s ", item.repr)
+			break
+		}
+	}
+}
+
 /* A brute force recursive implementation of 0-1 Knapsack problem 
 modified from: https://www.geeksforgeeks.org/0-1-knapsack-problem-dp-10 */
 
@@ -86,17 +97,48 @@ func KnapSack(W int, wt []int, val []int) int {
 		nth_included := val[last] + KnapSack(W - wt[last], wt[:last], val[:last])
 		nth_not_included := KnapSack(W, wt[:last], val[:last])
 
-		// if  Max(nth_included, nth_not_included) == nth_included {
-		// 	fmt.Printf("%d ", nth_included)
-
-		// 	return nth_included
-		// }else{
-		// 	return nth_not_included
-		// }
-
 		return Max(nth_included,nth_not_included)
 	}
 } 
+
+// concurrent implementation of Knapsack
+func KnapSackConcurrent(W int, wt []int, val []int, result chan int, availableItems []Item)  {
+
+    if (len(wt) == 0 || W==0) {
+		result <- 0 
+		return
+	}
+
+	last := len(wt)-1
+
+	if (wt[last] > W){
+
+		go KnapSackConcurrent(W, wt[:last], val[:last], result, availableItems)
+		return
+
+	}else{
+			
+		included := make(chan int)      // collect the next value after the nth item is included
+		not_included := make(chan int)  // collect the next value after the nth item is not included
+
+		go KnapSackConcurrent(W - wt[last], wt[:last], val[:last], included, availableItems)
+		go KnapSackConcurrent(W, wt[:last], val[:last],not_included, availableItems)
+
+		nth_included := val[last] + (<-included)
+		nth_not_included := (<-not_included)
+
+		max := Max(nth_included, nth_not_included)
+
+		result <- max
+
+		if max == nth_included {
+			displayItem(availableItems, val[last], wt[last])
+		}
+
+		return
+	}
+
+}
 
 // verifie si une erreur s'est produite
 // ref : https://gobyexample.com/reading-files
@@ -116,7 +158,7 @@ func main()  {
     // ref : https://stackoverflow.com/questions/35080109/golang-how-to-read-input-filename-in-go
 	// expect to read the filename from the command line
 	if len(os.Args) < 2 {
-		fmt.Println("Expecting two arguments (File to run and filename). You must provide the name of the filename via the command line. \n")
+		fmt.Println("\n> Expecting two arguments (File to run and filename). You must provide the name of the filename via the command line. \n")
 		return
 	}
 
@@ -216,7 +258,7 @@ func main()  {
 		return
 	}
 
-    fmt.Println("Number of cores: ",runtime.NumCPU())
+    
 
 	// initialize the parameters required for the defined function KnapSack
 	// maximum Knapsack capacity
@@ -239,10 +281,21 @@ func main()  {
 
 	fmt.Println("\n>>>> Solution <<<<< \n")
 	
-	start := time.Now();
+	fmt.Println("Number of cores: ",runtime.NumCPU())
+
+	start := time.Now()
 	fmt.Println(KnapSack(W, weights , values)) 
-	end := time.Now();
+	end := time.Now()
     fmt.Printf("Total runtime: %s\n", end.Sub(start))	
 
 
+	fmt.Println("Number of cores: ",runtime.NumCPU())
+
+	result := make(chan int, 2)
+	start = time.Now()
+	KnapSackConcurrent(W, weights , values, result, availableItems)
+	fmt.Println()
+	fmt.Println(<-result) 
+	end = time.Now()
+    fmt.Printf("Total runtime: %s\n", end.Sub(start))	
 } 
