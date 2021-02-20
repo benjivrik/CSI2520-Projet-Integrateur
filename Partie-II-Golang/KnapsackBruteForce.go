@@ -53,13 +53,16 @@ func filter(slice []string) ([]string){
 
 // custom function for finding the corresponding item selected
 // find the item by its value and its weight
-func displayItem(availableItems []Item, value, weight int){
+// find an item in the slice and return its representation
+func getItemRepresentation(availableItems []Item, value,weight int) (string){
+	repr := ""
 	for _, item :=  range availableItems {
 		if item.weight ==  weight && item.value == value {
-			fmt.Printf("%s ", item.repr)
-			break
+			repr = item.repr
 		}
 	}
+
+	return repr
 }
 
 /* A brute force recursive implementation of 0-1 Knapsack problem 
@@ -74,7 +77,8 @@ func Max(x, y int) int {
 
 // Returns the maximum value that 
 // can be put in a knapsack of capacity W 
-func KnapSack(W int, wt []int, val []int) int { 
+// initial recursive function 
+func KnapSackRec(W int, wt []int, val []int) int { 
 
 	// Base Case 
 	if (len(wt) == 0 || W == 0) {
@@ -87,55 +91,152 @@ func KnapSack(W int, wt []int, val []int) int {
 	// this item cannot be included 
 	// in the optimal solution 
 	if wt[last] > W { 
-		return KnapSack(W, wt[:last], val[:last])	 
+		return KnapSackRec(W, wt[:last], val[:last])	 
 
 	// Return the maximum of two cases: 
 	// (1) nth item included 
 	// (2) item not included 
 	} else {
 
-		nth_included := val[last] + KnapSack(W - wt[last], wt[:last], val[:last])
-		nth_not_included := KnapSack(W, wt[:last], val[:last])
+		nth_included := val[last] + KnapSackRec(W - wt[last], wt[:last], val[:last])
+		nth_not_included := KnapSackRec(W, wt[:last], val[:last])
 
 		return Max(nth_included,nth_not_included)
 	}
 } 
 
-// concurrent implementation of Knapsack
-func KnapSackConcurrent(W int, wt []int, val []int, result chan int, availableItems []Item)  {
+// Implemented KnapSack function using concurrent programming
+/**
+* 
+* @params
+* W - weight of the Knapsack
+* Wt - a slice of the weights associated to the items to be added
+* val - a slice of the values associated to the items to be added
+* result - an integer channel for storing the result returned by the goroutine for the optimal sequence
+* result_characters - an integer channel for storing the selected characters for the optimal sequence
+* 
+* @return none
+*
+**/
+func KnapSack(W int, wt []int, val []int, 
+	                    result chan int, result_characters chan string, availableItems []Item)  {
+
+	fmt.Println("Number of active go routines : ",runtime.NumGoroutine())
 
     if (len(wt) == 0 || W==0) {
 		result <- 0 
+		result_characters <- ""
 		return
 	}
 
 	last := len(wt)-1
 
-	if (wt[last] > W){
+	if (wt[last] > W){ // the item can be included in the Knapsack
+		// initialize a new goroutine without that item but the keep the initial channels passed as parameters
+		go KnapSack(W, wt[:last], val[:last], result, result_characters, availableItems)
+		return // terminate the goroutine
 
-		go KnapSackConcurrent(W, wt[:last], val[:last], result, availableItems)
-		return
-
-	}else{
+	}else{ // the item could  be included in the Knapsack
 			
 		included := make(chan int)      // collect the next value after the nth item is included
 		not_included := make(chan int)  // collect the next value after the nth item is not included
 
-		go KnapSackConcurrent(W - wt[last], wt[:last], val[:last], included, availableItems)
-		go KnapSackConcurrent(W, wt[:last], val[:last],not_included, availableItems)
+		// channels for collecting the included characters
+		character_included := make(chan string)       // a channel for when the nth item is included
+		character_not_included := make(chan string)	  // a channel for when the nth item is not included
 
-		nth_included := val[last] + (<-included)
-		nth_not_included := (<-not_included)
+		// initialize the parallel sequences
+		go KnapSack(W - wt[last], wt[:last], val[:last], included, character_included, availableItems)
+		go KnapSack(W, wt[:last], val[:last],not_included, character_not_included, availableItems)
 
+		// get the corresponding item values
+		nth_included := val[last] + (<-included) // if the nth is included
+		nth_not_included := (<-not_included)	 // if the nth item is not included
+
+		// get the maximum value between the two possibilities
 		max := Max(nth_included, nth_not_included)
 
+		// write the value to the channel 
 		result <- max
 
+		// get the corresponding items representation
 		if max == nth_included {
-			displayItem(availableItems, val[last], wt[last])
+
+			// find the item corresponding to the 
+			repr := getItemRepresentation(availableItems, val[last], wt[last])
+			// add the character found to the result
+			result_characters <- repr + " " + <-character_included
+		}else{
+			result_characters <- (<-character_not_included) + " "
 		}
 
+		return // terminate the routine
+	}
+
+}
+
+// optimal implementation for the Knapsack using a specific number of goroutines
+func KnapSackOptimal(W int, wt []int, val []int, 
+	result chan int, result_characters chan string, availableItems []Item)  {
+
+	fmt.Println("Number of active go routines : ",runtime.NumGoroutine())
+
+	if (len(wt) == 0 || W==0) {
+		result <- 0 
+		result_characters <- ""
 		return
+	}
+
+	// TO IMPROVE
+	last := len(wt)-1
+
+	if len(wt) % 2 == 0{
+		last = len(wt)/2-1
+	} else {
+		last = (len(wt)+1)/2-1
+	}
+
+	if (wt[last] > W){ // the item can be included in the Knapsack
+		// initialize a new goroutine without that item but the keep the initial channels passed as parameters
+		go KnapSack(W, wt[:last], val[:last], result, result_characters, availableItems)
+		return // terminate the goroutine
+
+	}else{ // the item could  be included in the Knapsack
+
+		included := make(chan int)      // collect the next value after the nth item is included
+		not_included := make(chan int)  // collect the next value after the nth item is not included
+
+		// channels for collecting the included characters
+		character_included := make(chan string)       // a channel for when the nth item is included
+		character_not_included := make(chan string)	  // a channel for when the nth item is not included
+
+		// initialize the parallel sequences
+		go KnapSack(W - wt[last], wt[:last], val[:last], included, character_included, availableItems)
+		go KnapSack(W, wt[:last], val[:last],not_included, character_not_included, availableItems)
+		go KnapSack(W - wt[last], wt[:last], val[:last], included, character_included, availableItems)
+		go KnapSack(W, wt[:last], val[:last],not_included, character_not_included, availableItems)
+
+		// get the corresponding item values
+		nth_included := val[last] + (<-included) // if the nth is included
+		nth_not_included := (<-not_included)	 // if the nth item is not included
+
+		// get the maximum value between the two possibilities
+		max := Max(nth_included, nth_not_included)
+
+		// write the value to the channel 
+		result <- max
+
+		// get the corresponding items representation
+		if max == nth_included {
+			// find the item corresponding to the 
+			repr := getItemRepresentation(availableItems, val[last], wt[last])
+			// add the character found to the result
+			result_characters <- repr + " " + <-character_included
+		}else{
+			result_characters <- (<-character_not_included) + " "
+		}
+
+		return // terminate the routine
 	}
 
 }
@@ -205,7 +306,7 @@ func main()  {
 		splitLine := strings.Split(line," ")
 
 		//fmt.Printf("\n>> %q", splitLine) // << DEBUG Purpose
-		// fmt.Printf("\n>> %d", len(splitLine)) // << DEBUG Purpose
+		//fmt.Printf("\n>> %d", len(splitLine)) // << DEBUG Purpose
 
 		// remove empty string
 		splitLine = filter(splitLine)
@@ -279,23 +380,45 @@ func main()  {
 	fmt.Printf("Weights: %v\nValues: %v\n", weights, values)
 	
 
-	fmt.Println("\n>>>> Solution <<<<< \n")
+	fmt.Println("\n>>>> Recursive Solution <<<<< \n")
 	
-	fmt.Println("Number of cores: ",runtime.NumCPU())
-
+	// fmt.Println("Number of cores: ",runtime.NumCPU())
 	start := time.Now()
-	fmt.Println(KnapSack(W, weights , values)) 
+	fmt.Println(KnapSackRec(W, weights , values)) 
 	end := time.Now()
     fmt.Printf("Total runtime: %s\n", end.Sub(start))	
 
+	fmt.Println("\n>>>> Concurrent Solution <<<<< \n")
 
-	fmt.Println("Number of cores: ",runtime.NumCPU())
+	// initialize the channels for storing the required results from the goroutines
+	result := make(chan int, 1)
+	result_characters := make(chan string, 1)
 
-	result := make(chan int, 2)
 	start = time.Now()
-	KnapSackConcurrent(W, weights , values, result, availableItems)
-	fmt.Println()
-	fmt.Println(<-result) 
+	KnapSack(W, weights , values, result, result_characters, availableItems)
+	// fmt.Println("Number of cores: ",runtime.NumCPU())
 	end = time.Now()
-    fmt.Printf("Total runtime: %s\n", end.Sub(start))	
+
+	fmt.Println()
+	fmt.Println(<-result_characters)
+	fmt.Println(<-result) 
+	fmt.Printf("Total runtime: %s\n", end.Sub(start))	
+
+
+	midLen :=0
+	if len(weights) % 2 == 0{
+		midLen = len(weights)/2
+	} else {
+		midLen = (len(weights)+1)/2
+	}
+
+	start = time.Now()
+	KnapSack(W, weights[:midLen] , values[:midLen], result, result_characters, availableItems)
+	// fmt.Println("Number of cores: ",runtime.NumCPU())
+	end = time.Now()
+
+	fmt.Println()
+	fmt.Println(<-result_characters)
+	fmt.Println(<-result) 
+	fmt.Printf("Total runtime: %s\n", end.Sub(start))
 } 
