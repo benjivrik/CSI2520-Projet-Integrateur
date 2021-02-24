@@ -1,0 +1,29 @@
+27
+laptop 40 112
+hoodie 39 80
+ua_long_sleeve 38 305
+leggings 37 185
+racerback 36 174
+travel_kit 35 665
+roost_stand 34 170
+bluetooth_keyboard 33 460
+plusslim_hard_disk 32 159
+denim_shorts 31 197
+nike_pro_shorts 30 112
+lululemon_shorts 29 184
+sandals 28 200
+tanktops 27 138
+socks 26 95
+no_show_socks 25 54
+tank 24 71
+gap_long_sleeve 23 147
+insulating_jacket 22 235
+torrentshell 21 301
+wool_buff 20 50
+lbo_ham 19 174
+memo_book 18 68
+power_bank 17 14
+headphones 13 14
+sunglasses 11 30
+headlamp 8 27
+7000
