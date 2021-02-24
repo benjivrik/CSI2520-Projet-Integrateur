@@ -1,3 +1,14 @@
+/**
+ * 
+ * Student : Benjamin Kataliko Viranga
+ * Student ID : 8842942
+ * CSI2520
+ * Projet Intégrateur -  Partie Concurrente (Go)
+ * 
+ */
+
+
+
 How to run the program ?
 
 From your command line, execute 

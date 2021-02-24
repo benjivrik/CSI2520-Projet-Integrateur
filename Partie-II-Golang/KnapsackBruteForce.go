@@ -1,3 +1,13 @@
+/**
+ * 
+ * Student : Benjamin Kataliko Viranga
+ * Student ID : 8842942
+ * CSI2520
+ * Projet Intégrateur -  Partie Concurrente (Go)
+ * 
+ */
+
+
 package main
 
 import(
