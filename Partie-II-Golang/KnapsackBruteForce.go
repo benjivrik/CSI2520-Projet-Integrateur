@@ -218,7 +218,7 @@ func KnapSackOptimal(W int, wt []int, val []int,
 		result <- optimal_val_rec
 		result_characters <- repr_rec
 
-		return // terimate the go routine
+		return // terminate the go routine
 	}
 
 	last := len(wt)-1
@@ -459,7 +459,6 @@ func main()  {
 	optimal_result := 0		   // optimal result obtained for the Knapsack
 
 
-
 	for index , seuil := range seuils {
 
 		fmt.Println("\nValeur du seuil : ",seuil)
@@ -516,6 +515,10 @@ func main()  {
 	optimal_result = 0
 	number_of_goroutine = 0
 
+	// initialize the channels
+	result = make(chan int,1)                 
+	result_characters = make(chan string,1) 
+
 	KnapSackOptimal(W, weights , values, result, result_characters, availableItems, seuils[optimal_duration_index], &number_of_goroutine)
 
 	// get the optimal values
@@ -544,7 +547,25 @@ func main()  {
         defer file.Close()
 
 		fmt.Printf("\n> File '%s' created cuccessfully\n", file_with_extension )
-    }
+    } else {
+		// remove the file and rewrite inside
+		e := os.Remove(file_with_extension) 
+		// make sure there is no error
+		check(e)
+
+		// 
+		fmt.Printf("\n> Old file '%s' deleted cuccessfully\n", file_with_extension )
+
+		var file, err5 = os.Create(file_with_extension)
+		// make sure there is no error
+        check(err5) // if yes panic
+
+        defer file.Close()
+
+		fmt.Printf("\n> New File '%s' created cuccessfully\n", file_with_extension )
+
+
+	}
 
 	
 	// Open file using READ & WRITE permission.

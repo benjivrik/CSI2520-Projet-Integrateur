@@ -17,7 +17,7 @@ From your command line, execute
 
 
 p1.txt est le fichier contenant les données utilisées pour l'entrée du programme.
-La sortie du programme p1.sol est créé et ajouter directement dans le meme folder dans lequel ces fichiers
+La sortie du programme p1.sol est créé et ajouté directement dans le meme folder dans lequel ces fichiers
 sont exécutés. 
 
 Peu importe le nom du fichier utilisé l'entrée : pour (filename.txt), la solution est (filename.sol) à condition que ce fichier 
@@ -35,6 +35,6 @@ Autres exigences:
   
   > go run KnapsackBruteForce.go autre_fichier.txt
 
-  Et sa solution est stockée dans le fichier 'autre_fichier.sol' et prend un plus de temps d'exécution en raison de la 
+  Et sa solution est stockée dans le fichier 'autre_fichier.sol' et prend un peu plus de temps d'exécution en raison de la 
   quantité de ses données.
 
