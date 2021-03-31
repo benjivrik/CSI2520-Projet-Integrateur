@@ -10,12 +10,12 @@
 % reference : https://stackoverflow.com/questions/37573618/how-to-read-a-file-in-prolog
 % reference : https://stackoverflow.com/questions/23411139/prolog-unexpected-end-of-file
 % at_end_of_stream : https://www.swi-prolog.org/pldoc/man?predicate=at_end_of_stream/1
-% at_end_of_stream, succeed when the last line is read.
+% at_end_of_stream succeeds when the last line is read.
 read_file(Stream, Lines) :-
     read_line_to_codes(Stream, Codes),     % Attempt a read Line from the stream
     atom_chars(Line, Codes),
     (  at_end_of_stream(Stream)       % If we're at the end of the stream then...
-    -> Lines = [Line]                 % ...lines read is empty
+    -> Lines = [Line]                 %  at_end_of_stream succeeds when the last line is read.
     ;  Lines = [Line|NewLines],       % Otherwise, Lines is Line followed by
        read_file(Stream, NewLines)    %   a read of the rest of the file
     ).
