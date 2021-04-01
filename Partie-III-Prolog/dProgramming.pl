@@ -21,7 +21,7 @@ read_file(Stream, Lines) :-
     ).
 
 % Ce predicat retourne les donnees du fichier
-get_data(Filename, Data):-
+get_data(Filename, Capacity, L_items_weight, L_items_list, All_items):-
     open(Filename, read, Str),nl,
     write('Reading : '), writeln(Filename),
     read_file(Str, Data),          
@@ -60,7 +60,7 @@ no_space_str_to_int(Str, Int):-
 % Avec le premier element de la liste representant le nombre d'element à ajouter
 % Cet élement est suivi des élements à ajouter
 % le dernier élement de la liste est la capacité du sac
-process_data(Data, _L_items_weight, _L_items_value, _All_items):-
+process_data(Data, L_items_weight, L_items_value, All_items):-
     remove_first(Data, F, LL),           % LL is Data without the first element N_items
     no_space_str_to_int(F,N_items),      % get the integer value for the number of items
     % writeln(N_items), 
@@ -110,11 +110,55 @@ process_items(L_items_str, L_items_weight, L_items_value, All_items):-
     write('> Items weights : '),  writeln(L_items_weight),
     write('> Items values : '),  writeln(L_items_value),nl.
 
+% Générateur de liste pour l'item ajouter
+% B_cap : Capacité du sac (Bag capacity)
+% Capacité : représentant la valeur maximale du sac
+% retourne une liste vide pour la rangee correspondante
+row_gen(Max_cap,_,_,_,B_cap,[]):- B_cap > Max_cap, !.
+
+% initial row - with zeros
+row_gen(Max_cap,_, 0,0,B_cap,[0|RR]):-
+    Next_cap is B_cap + 1,
+    row_gen(Max_cap,[], 0, 0,Next_cap,RR).
+
+% initialisation de la ligne suivante
+row_gen(Max_cap,Previous_row,Item_value,Item_weight,0,[0|RR]):-
+    row_gen(Max_cap,Previous_row, Item_value, Item_weight,1,RR).
+
+% if the item weight is above the maximum allowed capacity
+row_gen(Max_cap, Previous_Row, Item_value, Item_weight, B_cap,[0|RR]):-
+    B_cap < Item_weight, 
+    % nth0(B_cap, Previous_Row, Previous_Value),
+    % (Previous_Value > Item_value
+    %     -> VV is Previous_Value, write(VV)
+    %     ; VV is 0
+    % ),
+    Next_cap is B_cap + 1, 
+    row_gen(Max_cap, Previous_Row,Item_value, Item_weight, Next_cap, RR).
+
+% if the item weight can fit the current knapsack capacity
+
+row_gen(Max_cap, Previous_Row, Item_value, Item_weight, B_cap,[VV|RR]):-
+    B_cap >= Item_weight, Diff_weight is B_cap - Item_weight, 
+    nth0(Diff_weight, Previous_Row, Previous_value),
+    VV is  Previous_value + Item_value,
+    Next_cap is B_cap + 1,
+    row_gen(Max_cap, Previous_Row, Item_value, Item_weight, Next_cap,RR).
+    
+
+% generateur de liste pour l'item ajouter
+% cap_gen().
+% knapsack problem
+% knapsack(Capacity, L_items_weight, L_items_value, Value, L_items_list).
 
 
-%dynamic_process
-%dynamic_process(Capacity, L_items_weight, L_items_value,All_items, Value, L_items_list).
+% dynamic_process
+% dynamic_process(Capacity, L_items_weight, L_items_value,_, Value, L_items_list):-
+    % knapsack
+    % knapsack(Capacity, L_items_weight, L_items_value, Value, L_items_list).
        
-
-%solveKnapsack(Filename, Value, L_items_list).
-%knapsack(Capacity, L_items_weight, L_items_value, Value, L_items_list).
+% solve Knapsack - initial predicate for the program
+solveKnapsack(Filename, Value, L_items_list):-
+    % collect data from the document
+    get_data(Filename, Capacity, L_items_weight, L_items_list,_),
+    knapsack(Capacity, L_items_weight, L_items_value, Value, L_items_list).
