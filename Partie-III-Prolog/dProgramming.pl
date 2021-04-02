@@ -2,7 +2,7 @@
 %Student : Benjamin Kataliko Viranga
 %Student ID : 8842942
 %CSI2520
-%Projet Intégrateur -  Partie Concurrente (Go)
+%Projet Intégrateur -  Partie Logique (Prolog)
 %
 
 
@@ -55,7 +55,7 @@ no_space_str_to_int(Str, Int):-
     atom_number(Str_new, Int).           % get the integer
 
 % process data
-% Le format de la liste Data lu fichier filename est 
+% Le format de la liste Data lu du fichier filename est 
 % ['4 ', 'A  1  1', 'B  6  2', 'C  10 3', 'D  15 5', '7']
 % Avec le premier element de la liste representant le nombre d'element à ajouter
 % Cet élement est suivi des élements à ajouter
@@ -73,7 +73,7 @@ process_data(Data, Capacity, L_items_weight, L_items_value, All_items):-
     process_items(LL_new, L_items_weight, L_items_value, All_items).
 
 
-% get the items and initialize the corresponding list
+% get the items and initialize the corresponding lists
 get_items([],[],[],[]).
 get_items([I|L],L_items_weight,L_items_value, All_items):-
        get_items(L, W, V, All),
@@ -98,10 +98,10 @@ get_items([I|L],L_items_weight,L_items_value, All_items):-
        % collecter les valeurs des items
        append([Item_value], V, L_items_value).
 
-%retourne les items en termes composés dans la list L_items_list
+%retourne les items en termes composés dans la list All_items
 %L_items_weight : liste des poids
 %L_items_value  : liste des valeurs
-%L_items_list   : Liste des items en termes composés
+%All_items  : Liste des items en termes composés
 process_items(L_items_str, L_items_weight, L_items_value, All_items):-
     % get the corresponding items
     %writeln(L_items_str),
@@ -110,7 +110,7 @@ process_items(L_items_str, L_items_weight, L_items_value, All_items):-
     write('> Items weights : '),  writeln(L_items_weight),
     write('> Items values : '),  writeln(L_items_value),nl.
 
-% Générateur de liste pour l'item ajouter
+% Générateur de liste pour l'item ajouté
 % B_cap : Capacité du sac (Bag capacity)
 % Capacité : représentant la valeur maximale du sac
 % retourne une liste vide pour la rangee correspondante
@@ -153,9 +153,9 @@ row_gen(Max_cap, Previous_Row, Item_value, Item_weight, B_cap,[VV|RR]):-
     row_gen(Max_cap, Previous_Row, Item_value, Item_weight, Next_cap,RR).
     
 
-% generateur de liste pour l'item ajouter
-% cap_gen().
-% knapsack problem
+% Knapsack process
+% Ce predicat renvoie la valeur optimal pour la rangee
+% cette valeur correspond au dernier élément de la liste
 knapsack_process(Capacity,[],[],Result,0,[]):-
     row_gen(Capacity,_, 0,0,0,Result), writeln(Result). % initial row of zeros
 knapsack_process(Capacity, [W|WW], [V|VV], Result, Value, []):-
@@ -174,7 +174,7 @@ knapsack_process(Capacity, [W|WW], [V|VV], Result, Value, []):-
 % L_items_list :  la liste des valeurs des items dans le knapsack optimal
 knapsack(Capacity, L_items_weight, L_items_value, Value, L_items_list):-
 
-    % reverse the list - because the recursivity is starting from the last the item
+    % reverse the list - because the recursivity is starting from the last item
     reverse(L_items_weight, R_weight),
     reverse(L_items_value, R_value),
     % debug purpose
@@ -237,7 +237,9 @@ get_items_repr(All_items,L_items_value, L_opt_values, L_items_list):-
 solveKnapsack(Filename, Value, L_items_list):-
     % collect data from the document
     get_data(Filename, Capacity, L_items_weight, L_items_value,All_items),
+    % proceed with the optimal value
     knapsack(Capacity, L_items_weight, L_items_value, Value, L_opt_values),
     % get the items representation for L_items_list
     get_items_repr(All_items, L_items_value , L_opt_values, L_items_list),
+    % write the result inside the .sol file
     write_data(Filename, Value, L_items_list).
