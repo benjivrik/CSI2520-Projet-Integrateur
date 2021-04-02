@@ -21,13 +21,13 @@ read_file(Stream, Lines) :-
     ).
 
 % Ce predicat retourne les donnees du fichier
-get_data(Filename, Capacity, L_items_weight, L_items_list, All_items):-
+get_data(Filename, Capacity, L_items_weight, L_items_value, All_items):-
     open(Filename, read, Str),nl,
     write('Reading : '), writeln(Filename),
     read_file(Str, Data),          
     close(Str),
     %write(Data), nl, 
-    process_data(Data,_,_,_).      %process data
+    process_data(Data,Capacity, L_items_weight,L_items_value,All_items).      %process data
 
 %remove first element of list
 %return the first element and the rest of the list
@@ -60,7 +60,7 @@ no_space_str_to_int(Str, Int):-
 % Avec le premier element de la liste representant le nombre d'element à ajouter
 % Cet élement est suivi des élements à ajouter
 % le dernier élement de la liste est la capacité du sac
-process_data(Data, L_items_weight, L_items_value, All_items):-
+process_data(Data, Capacity, L_items_weight, L_items_value, All_items):-
     remove_first(Data, F, LL),           % LL is Data without the first element N_items
     no_space_str_to_int(F,N_items),      % get the integer value for the number of items
     % writeln(N_items), 
@@ -126,22 +126,29 @@ row_gen(Max_cap,Previous_row,Item_value,Item_weight,0,[0|RR]):-
     row_gen(Max_cap,Previous_row, Item_value, Item_weight,1,RR).
 
 % if the item weight is above the maximum allowed capacity
-row_gen(Max_cap, Previous_Row, Item_value, Item_weight, B_cap,[0|RR]):-
-    B_cap < Item_weight, 
-    % nth0(B_cap, Previous_Row, Previous_Value),
-    % (Previous_Value > Item_value
-    %     -> VV is Previous_Value, write(VV)
-    %     ; VV is 0
-    % ),
+row_gen(Max_cap, Previous_Row, Item_value, Item_weight, B_cap,[VV|RR]):-
+    B_cap < Item_weight,  % the item can not fit inside the knapsack
+    nth0(B_cap, Previous_Row, Previous_Value), 
+    VV is Previous_Value, % assign the previous value to the current value for the row
     Next_cap is B_cap + 1, 
     row_gen(Max_cap, Previous_Row,Item_value, Item_weight, Next_cap, RR).
 
-% if the item weight can fit the current knapsack capacity
 
+% if the item weight can fit the current knapsack capacity
 row_gen(Max_cap, Previous_Row, Item_value, Item_weight, B_cap,[VV|RR]):-
-    B_cap >= Item_weight, Diff_weight is B_cap - Item_weight, 
+    B_cap >= Item_weight,   % the item can fit inside the knapsack
+    Diff_weight is B_cap - Item_weight, 
     nth0(Diff_weight, Previous_Row, Previous_value),
-    VV is  Previous_value + Item_value,
+    % evaluate the corresponding value VV_temp based on the difference between the weights
+    % B_cap - Item_weight
+    VV_temp is  Previous_value + Item_value,
+    % get current Bcap of Previous row
+    nth0(B_cap, Previous_Row, B_cap_prev_value),
+    (B_cap_prev_value >  VV_temp     % compare the maximum between the two rows at index B_cap
+        -> VV is B_cap_prev_value    % if the previous value is higher VV is the previous value
+        ; VV is VV_temp              % if not VV is VV_temp
+    ),
+    % writeln(VV),nl,
     Next_cap is B_cap + 1,
     row_gen(Max_cap, Previous_Row, Item_value, Item_weight, Next_cap,RR).
     
@@ -149,16 +156,88 @@ row_gen(Max_cap, Previous_Row, Item_value, Item_weight, B_cap,[VV|RR]):-
 % generateur de liste pour l'item ajouter
 % cap_gen().
 % knapsack problem
-% knapsack(Capacity, L_items_weight, L_items_value, Value, L_items_list).
+knapsack_process(Capacity,[],[],Result,0,[]):-
+    row_gen(Capacity,_, 0,0,0,Result), writeln(Result). % initial row of zeros
+knapsack_process(Capacity, [W|WW], [V|VV], Result, Value, []):-
+    knapsack_process(Capacity, WW, VV, Res,_, _),
+    row_gen(Capacity, Res, V, W, 0, Result),
+    writeln(Result),
+    last(Result,Value).     % knapsack optimal value is the last value
 
 
-% dynamic_process
-% dynamic_process(Capacity, L_items_weight, L_items_value,_, Value, L_items_list):-
+% knapsack predicate
+% En input :
+% Capacity : La valeur maximale de la capacité du Knapsack
+% L_items_weight :  la liste des poids des items à ajouter
+% L_items_value : la liste des valeurs des items du Knapsack
+% En output :
+% L_items_list :  la liste des valeurs des items dans le knapsack optimal
+knapsack(Capacity, L_items_weight, L_items_value, Value, L_items_list):-
+
+    % reverse the list - because the recursivity is starting from the last the item
+    reverse(L_items_weight, R_weight),
+    reverse(L_items_value, R_value),
+    % debug purpose
+    % writeln(R_weight),
+    % writeln(R_value),
     % knapsack
-    % knapsack(Capacity, L_items_weight, L_items_value, Value, L_items_list).
+    knapsack_process(Capacity, R_weight, R_value,_, Value,_),
+    nl,
+    % get list of optimal values
+    solve_subset(Value,L_items_value, L_items_list).
+
+% write data into .sol file,
+% reference :  https://stackoverflow.com/questions/22747147/swi-prolog-write-to-file
+% atomic_list_concat : https://www.swi-prolog.org/pldoc/doc_for?object=atomic_list_concat/3
+write_data(Filename, Value, L_items_list):-
+   % split string
+   split_string(Filename, '.', '.', File_no_ext_arr),
+   % remove the filename from the array
+   remove_first(File_no_ext_arr,File_no_ext,_),
+   % add the .sol extension to the file
+   atom_concat(File_no_ext,'.sol', New_filename),
+   % open the stream for writing
+   open(New_filename, write, Out),
+   % write the content of the file
+   writeln(Out, Value),
+   % collect the names of the items from the L_items_list
+   findall(N, (member(X,L_items_list), item(N,_,_) = X), Names),
+   % concatenate the name with a space as separator
+   atomic_list_concat(Names, " " , W),
+   % new line
+   % write W in the .sol file
+   writeln(Out,W),
+   close(Out).
+
+% get all items combinations from a list
+% ref : https://stackoverflow.com/questions/41662963/all-combinations-of-a-list-without-doubles-in-prolog
+combs([],[]).
+combs([H|T],[H|T2]) :-
+    combs(T,T2).
+combs([_|T],T2) :-
+    combs(T,T2).
+
+%sums the items in the list that correspond to a value
+%ref : https://stackoverflow.com/questions/49297842/find-all-combinations-of-elements-in-a-list-that-sum-up-to-a-value
+solve_subset(MaxVal,Lin,Lout):-
+    combs(Lin,Lout),    % generate all the possible combinations
+    sumlist(Lout,Val),  % this sum of the subset correspond to the specific value
+    Val = MaxVal.       % MaxVal is the sum 
+
+
+% get items representation based on the list of values given as paramater
+get_items_repr(All_items,L_items_value, L_opt_values, L_items_list):-
+    % find all the index of the elements from L_opt_values inside L_items_values
+    findall(I, (member(X,L_opt_values), member(X,L_items_value),nth0(I,L_items_value,X)), Bag), 
+    % get the items from the list of initial items
+    findall(O,(member(X,Bag), nth0(X,All_items,O)), L_items_list).
+   
        
 % solve Knapsack - initial predicate for the program
 solveKnapsack(Filename, Value, L_items_list):-
     % collect data from the document
-    get_data(Filename, Capacity, L_items_weight, L_items_list,_),
-    knapsack(Capacity, L_items_weight, L_items_value, Value, L_items_list).
+    get_data(Filename, Capacity, L_items_weight, L_items_value,All_items),
+    knapsack(Capacity, L_items_weight, L_items_value, Value, L_opt_values),
+    % get the items representation for L_items_list
+    get_items_repr(All_items, L_items_value , L_opt_values, L_items_list),
+    write_data(Filename, Value, L_items_list).
