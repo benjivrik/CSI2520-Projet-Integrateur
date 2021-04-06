@@ -70,7 +70,7 @@
 ; assumant que la taille de la liste items est un multiple 3
 (define (process-items items)
   (if( = (length (cdr(cdr(cdr items))) ) 0)
-      (list (car items) (car (cdr items)) (car (cdr (cdr items))))
+      (cons (list (car items) (car (cdr items)) (car (cdr (cdr items)))) empty)
      (
       cons(
             list (car items) (car (cdr items)) (car (cdr (cdr items)))
@@ -101,6 +101,7 @@
       (display unprocessed_items)
       (display "\n")
       (display processed_items)
+      (display "\n")
       processed_items
      )
   )
