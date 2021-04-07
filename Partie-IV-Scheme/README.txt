@@ -22,3 +22,7 @@ La fonction (Knapsack capacity items) est également définie. Ainsi si vous dé
 ci-dessous à partir du terminal, vous obtiendrez les résultats correspondant au Knapsack.
 
 >  (knapsack 7 '(("A" 1 1) ("B" 6 2) ("C" 10 3) ("D" 15 5))) 
+
+
+La solution obtenue après avoir utilisé la fonction solveKnapsack est disponible dans 
+le fichier filename avec une extension .sol 

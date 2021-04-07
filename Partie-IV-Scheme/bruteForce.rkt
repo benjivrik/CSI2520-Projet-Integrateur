@@ -245,11 +245,27 @@
   )
 )
 
+;write solution in a file
+; ref : https://stackoverflow.com/questions/10441164/write-data-to-a-non-existing-file-in-scheme-after-creating-through-the-program
+; ref : https://stackoverflow.com/questions/30683279/using-the-exist-flag-to-overwrite-existing-file
+(define (write-to-a-file path txt)
+  (call-with-output-file path
+    (lambda (output-port)
+      (write txt output-port))
+   #:exists 'replace ))
 
 ; solveKnapsack
 (define (solveKnapsack filename)
-    ; get and process the content of the filename
-    (process-content (get-filtered-content filename))
+
+   (let(
+         (src_dest (string-append filename ".sol"))     ; .sol file pour la solution final
+         (optimal_sol (process-content (get-filtered-content filename)) ) ; collecte la solution optimal
+       )
+       (begin
+         (write-to-a-file src_dest optimal_sol )  ; écrire la solution optimale
+         optimal_sol
+       )
+   )
 )
 
 
