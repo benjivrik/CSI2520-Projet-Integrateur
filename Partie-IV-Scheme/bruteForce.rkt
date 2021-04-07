@@ -20,7 +20,6 @@
         (if (not (eof-object? x))
             (begin
               ; (display x)
-              ; (loop (read-char input-port))
               (cons x (loop (read input-port)))
              )
             empty
@@ -66,7 +65,7 @@
    (filter-symbol (remv* '(#\return #\space #\newline)(get-content filename)))
 )
 
-; change all symbole to a list to string
+; change all symbols in a list to string
 (define (filter-symbol L)
   ( cond
      [(null? L) '()]
@@ -168,7 +167,7 @@
 ; assuming the optimal_set is never null
 (define (get_items_names optimal_set)
   (cond
-     [(null? (cdr optimal_set)) (cons (list-ref (car optimal_set) 0) empty)] ; item name is always the fist element of the subset
+     [(null? (cdr optimal_set)) (cons (list-ref (car optimal_set) 0) empty)] ; item name is always the first element of the subset
      [else (cons (list-ref (car optimal_set) 0) (get_items_names (cdr optimal_set)) ) ]
    )
 )
@@ -190,28 +189,29 @@
          (legal_weights (get-legal-knapsack (process-subsets (subsets items) ) capacity))
         )
       (begin
-        (display "\n")  
-        (display legal_weights)
-        (display "\n")
-        (display all_subsets)
-        (display "\n")
+        ;(display "\n")  
+        ;(display legal_weights) ; debug purpose
+        ;(display "\n")
+        ;(display all_subsets)   ; debug purpose
+        ;(display "\n")
         (let(
-             ; get index of the maximum legal weight foud in the legal_weights  list
+             ; get index of the maximum legal weight found in the legal_weights  list
              (max_index (get-list-index legal_weights (maximum legal_weights)))
              )
            (begin
-             (display "\n")
-             (display max_index)
+             ;;(display "\n")
+             ; (display max_index)
              (display "\n")
              (let (
                    ; get the index of the optimal subset
                    (optimal_subset (list-ref all_subsets max_index))
                    )
-                (display "\n")
+                (display "> Optimal subset found :")
                 (display optimal_subset)
                 (display "\n")
-                (display "\n")
+                (display "> Optimal solution : ")
                 (display (process_optimal_solution optimal_subset))
+                (display "\n")
                 (display "\n")
                 (process_optimal_solution optimal_subset)
              )
@@ -223,7 +223,7 @@
 
 
 ; process-content
-; content is a list of chars
+; content is a list of the data collected from the file
 (define (process-content content)
   (
    let (
@@ -232,10 +232,12 @@
         (processed_items (process-items (remove-first (remove-last content)) ))
        )
     (begin
-      (display capacity)
-      ; (display "\n")
-      ; (display unprocessed_items)
       (display "\n")
+      (display "> Collected capacity : ")
+      (display capacity)
+      (display "\n")
+      ; (display unprocessed_items)
+      (display "> Collected items : ")
       (display processed_items)
       (display "\n")
       (knapsack capacity processed_items)
@@ -246,7 +248,7 @@
 
 ; solveKnapsack
 (define (solveKnapsack filename)
-    ; get filtered content
+    ; get and process the content of the filename
     (process-content (get-filtered-content filename))
 )
 
