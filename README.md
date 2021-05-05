@@ -13,8 +13,11 @@ I am only posting the codes and files I submitted.
 This project is about solving the Knapsack Problem in 4 four different paradigms with the specified approach
 
 → In Java : Dynamic Approach and Brute Force Approach
+
 → In Go : BruteForce Approach using Goroutines and recursive approach 
+
 → In Prolog : Dynamic Approach
+
 → In Scheme : Brute Force Approach
 
 External resources were authorized for building each project. 
